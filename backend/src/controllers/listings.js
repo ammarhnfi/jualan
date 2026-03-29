@@ -5,18 +5,28 @@ const { notifyNearbyUsers } = require('../services/notifications');
 
 // Create a new listing
 router.post('/', async (req, res) => {
-  const { title, description, category_id, price, contact, latitude, longitude } = req.body;
+  const { title, description, category_id, price, contact, latitude, longitude, device_id } = req.body;
 
-  if (!title || !contact || !latitude || !longitude) {
-    return res.status(400).json({ error: 'Missing required fields' });
+  if (!title || !contact || !latitude || !longitude || !device_id) {
+    return res.status(400).json({ error: 'Missing required fields or device_id' });
   }
 
   try {
+    // Check Rate Limiting (Spam protection)
+    const rateCheck = await pool.query(
+      `SELECT COUNT(*) FROM listings WHERE device_id = $1 AND created_at > NOW() - INTERVAL '1 hour'`,
+      [device_id]
+    );
+    
+    if (parseInt(rateCheck.rows[0].count) >= 10) {
+      return res.status(429).json({ error: 'Batas maksimal 10 posting jualan per jam telah tercapai. Silakan coba lagi nanti.' });
+    }
+
     const result = await pool.query(
-      `INSERT INTO listings (title, description, category_id, price, contact, location)
-       VALUES ($1, $2, $3, $4, $5, ST_SetSRID(ST_MakePoint($6, $7), 4326))
+      `INSERT INTO listings (title, description, category_id, price, contact, location, device_id)
+       VALUES ($1, $2, $3, $4, $5, ST_SetSRID(ST_MakePoint($6, $7), 4326), $8)
        RETURNING id, title, ST_AsGeoJSON(location) as location`,
-      [title, description, category_id, price, contact, longitude, latitude]
+      [title, description, category_id, price, contact, longitude, latitude, device_id]
     );
 
     const newListing = result.rows[0];

@@ -19,6 +19,9 @@ CREATE TABLE IF NOT EXISTS listings (
 
 CREATE INDEX IF NOT EXISTS listings_location_gix ON listings USING GIST (location);
 
+-- Add device fingerprinting column for rate limits
+ALTER TABLE listings ADD COLUMN IF NOT EXISTS device_id VARCHAR(255);
+
 -- Insert default categories if not exists
 INSERT INTO categories (name, icon)
 SELECT 'Food', '🍔'

@@ -1,21 +1,33 @@
-# Node
+# Dependencies & Build paths
 node_modules/
-npm-debug.log
-yarn-error.log
+backend/node_modules/
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+dist/
+build/
 
-# Environment variables
+# Logistics / Local Logs
+logs
+*.log
+npm-debug.log*
+
+# Secrets & Environment Variables 
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# OS
+# Docker dev overrides
+docker-compose.override.yml
+
+# Massive Geo-Spatial Data
+*.geojson
+*.gpkg
+*.qmd
+
+# OS / Editor specifics
 .DS_Store
 Thumbs.db
-
-# Project specific
-backend/node_modules/
-frontend/node_modules/
-frontend/.next/
-frontend/out/
+.vscode/
